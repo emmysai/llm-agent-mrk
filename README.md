@@ -296,6 +296,29 @@ llm agent - MRK/
 | `TURTLEBOT3_MODEL` | Robotermodell (`burger`, `waffle`) | Ja |
 ---
 
+
+## Empfehlung
+
+Ein LLM-Chatbot sollte nicht als alleinige Entscheidungsinstanz für die direkte Steuerung eines industriellen Roboters verwendet werden.  
+Mögliche Risiken sind Halluzinationen, Fehlinterpretationen von Benutzeranfragen oder unvollständige Ausgaben. Besonders in sicherheitskritischen Anwendungen kann dies problematisch sein.
+
+Sinnvoll ist der Einsatz eines LLMs jedoch als unterstützende Komponente, zum Beispiel für:
+
+- Assistenzsysteme
+- Diagnoseoberflächen
+- Monitoring und Zustandsabfragen
+- Zugriff auf technische Dokumentation
+- Trainings- und Lernunterstützung
+------------------------------------------------------------------------
+
+---
+
+# ros2-llm-patrol
+
+docker container basis from:
+https://github.com/nils93/chat2robot
+
+
 ## Fehlerbehebung
 
 **Gazebo startet nicht:**

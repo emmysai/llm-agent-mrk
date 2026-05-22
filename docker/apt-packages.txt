@@ -1,0 +1,21 @@
+# Core development tools
+git
+curl
+gdb
+gdbserver
+python3-pip
+python3-colcon-common-extensions
+
+# Essential ROS2 components
+ros-humble-rviz2
+ros-humble-robot-state-publisher
+ros-humble-joint-state-publisher
+
+# Simulation and TurtleBot3 packages
+ros-humble-gazebo-ros-pkgs
+ros-humble-turtlebot3
+ros-humble-turtlebot3-gazebo
+ros-humble-turtlebot3-navigation2
+
+# Control interfaces
+ros-humble-diff-drive-controller

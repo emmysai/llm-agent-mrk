@@ -1,0 +1,42 @@
+services:
+  ros2_environment:
+    image: ros2-turtlebot3
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ros2_tb3_container
+    privileged: true
+    network_mode: host
+    ipc: host
+    tty: true
+
+    command: >
+      /bin/bash -c '
+        echo "Checking LLM API configuration...";
+
+        if [ -z "$$GOOGLE_API_KEY" ] && [ -z "$$MISTRAL_API_KEY" ]; then
+          echo "Error: No LLM API key detected.";
+          echo "Please define GOOGLE_API_KEY or MISTRAL_API_KEY before starting.";
+          exit 1;
+        fi;
+
+        echo "Active LLM backends:";
+        [ -n "$$GOOGLE_API_KEY" ] && echo "  Google Gemini enabled";
+        [ -n "$$MISTRAL_API_KEY" ] && echo "  Mistral enabled";
+
+        exec bash;
+      '
+
+    volumes:
+      - ../ros2_ws:/home/ubuntu/ros2_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+    environment:
+      DISPLAY: $DISPLAY
+      QT_X11_NO_MITSHM: 1
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+
+volumes:
+  ros2_ws:
+    driver: local

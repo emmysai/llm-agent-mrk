@@ -1,0 +1,32 @@
+# ROS / colcon build folders
+build/
+install/
+log/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment files / secrets
+.env
+*.env
+.env.*
+
+# VS Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Large ROS bag files
+*.bag
+*.db3
+
+# Temporary files
+tmp/
+temp/

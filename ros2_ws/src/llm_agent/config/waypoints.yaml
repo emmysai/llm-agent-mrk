@@ -1,0 +1,6 @@
+frame_id: map
+waypoints:
+  - {name: Home, x:  0.00, y:  0.00, yaw: 0.00}
+  - {name: A,    x: -2.00, y:  1.00, yaw: 0.00}
+  - {name: B,    x: -0.50, y: -2.00, yaw: 0.00}
+  - {name: Ziel, x: -2.00, y: -1.50, yaw: 0.00}

@@ -292,11 +292,8 @@ llm agent - MRK/
 | Variable | Beschreibung | Pflicht |
 |----------|-------------|---------|
 | `GOOGLE_API_KEY` | API-Key für Google Gemini | Ja |
-| `MISTRAL_API_KEY` | API-Key für Mistral (optional) | Nein |
 | `GEMINI_MODEL` | Modell-Name (Standard: `gemini-2.5-flash`) | Nein |
 | `TURTLEBOT3_MODEL` | Robotermodell (`burger`, `waffle`) | Ja |
-| `DISPLAY` | X11-Display für Gazebo/RViz | Ja (GUI) |
-
 ---
 
 ## Fehlerbehebung

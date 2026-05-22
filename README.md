@@ -44,7 +44,7 @@ Ein ROS2-Projekt, das einen TurtleBot3 in einer Gazebo-Simulation autonom auf Pa
 
 ---
 
-## Schnellstart (empfohlen)
+## Schnellstart
 
 ```bash
 # Repository klonen

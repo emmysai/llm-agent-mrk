@@ -147,7 +147,12 @@ Registriert die ROS2-Services, die der Chatbot als Tools nutzt.
 
 ```bash
 source ~/ros2_ws/install/setup.bash
-ros2 run llm_agent chat
+source /opt/ros/humble/setup.bash
+pip install --user streamlit
+python3 -m streamlit run ~/ros2_ws/src/llm_agent/llm_agent/ui.py --server.address 0.0.0.0 --server.port 8501
+
+
+
 ```
 
 ---
@@ -310,8 +315,6 @@ Sinnvoll ist der Einsatz eines LLMs jedoch als unterstützende Komponente, zum B
 - Zugriff auf technische Dokumentation
 - Trainings- und Lernunterstützung
 ------------------------------------------------------------------------
-
----
 
 # ros2-llm-patrol
 

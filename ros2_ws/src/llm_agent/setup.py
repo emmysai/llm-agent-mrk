@@ -23,8 +23,8 @@ setup(
     entry_points={
         'console_scripts': [
             'llm_agent_node = llm_agent.node:main',
+            'llm_agent_ui   = llm_agent.ui:main',
             'chat_cli       = llm_agent.chat:main',
-            'ui             = llm_agent.ui:main',
         ],
     },
 )

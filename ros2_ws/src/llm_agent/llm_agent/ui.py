@@ -31,20 +31,17 @@ SYSTEM_PROMPT = """You are a ROS2 robot assistant for a TurtleBot3 mobile robot 
 LANGUAGE RULE: Always respond in the SAME language the user uses for their question.
 
 You have access to these tools:
-1. get_robot_pose()                      – Returns current robot position (x, y, yaw) in the map frame. No parameters.
-2. get_waypoints()                        – Returns all 4 patrol waypoints with names and coordinates. No parameters.
-3. calculate_distance(point_a, point_b)  – Calculates Euclidean distance between two 2-D points. Each point is a dict with keys 'x' and 'y'.
-4. get_robot_state()                      – Returns full sensor snapshot (pose, speed, laser scan, IMU).
+1. get_robot_pose()                      - Returns current robot position (x, y, yaw) in the map frame. No parameters.
+2. get_waypoints()                        - Returns all 4 patrol waypoints with names and coordinates. No parameters.
+3. calculate_distance(point_a, point_b)  - Calculates Euclidean distance between two 2-D points. Each point is a dict with keys 'x' and 'y'.
 
 TOOL USAGE STRATEGY:
-- "Where is the nearest waypoint?" / "Welcher Punkt ist am nächsten?"
-  → call get_robot_pose(), then get_waypoints(), then calculate_distance() for EACH waypoint → report the minimum.
-- "Which waypoint is farthest?" / "Welcher Punkt ist am weitesten entfernt?"
-  → call get_robot_pose(), then get_waypoints(), then calculate_distance() for EACH waypoint → report the maximum.
-- "How far are all waypoints?" / "Wie weit sind alle Punkte?"
-  → call get_robot_pose(), then get_waypoints(), then calculate_distance() for EVERY waypoint → list all distances.
-- "What is the robot status?" / "Wie ist der Zustand?"
-  → call get_robot_state().
+- "Where is the nearest waypoint?" 
+  -> call get_robot_pose(), then get_waypoints(), then calculate_distance() for EACH waypoint → report the minimum.
+- "Which waypoint is farthest?" 
+  -> call get_robot_pose(), then get_waypoints(), then calculate_distance() for EACH waypoint → report the maximum.
+- "How far are all waypoints?"
+  -> call get_robot_pose(), then get_waypoints(), then calculate_distance() for EVERY waypoint → list all distances.
 - General distance questions: always use get_robot_pose() + get_waypoints() + calculate_distance().
 
 RESPONSE FORMAT:
@@ -80,47 +77,21 @@ class UsageTracker(BaseCallbackHandler):
         self.tool_calls += 1
 
     def on_llm_end(self, response, **kwargs):
-
         for gens in response.generations:
-
             for gen in gens:
-                info = getattr(gen, "generation_info", None) or {}
-                meta = info.get("usage_metadata", {})
-                if meta:
-                    self.input_tokens  += meta.get("prompt_token_count", 0)
-                    self.output_tokens += meta.get("candidates_token_count", 0)
-                    self.total_tokens  += meta.get("total_token_count", 0)
-
-
+                msg = getattr(gen, "message", None)
+                if msg:
+                    meta = getattr(msg, "usage_metadata", None) or {}
+                    if meta:
+                        self.input_tokens  += meta.get("input_tokens", 0)
+                        self.output_tokens += meta.get("output_tokens", 0)
+                        self.total_tokens  += meta.get("total_tokens", 0)    
 # ------------------------------------------------------------------
 # Tool input schema for calculate_distance
 # ------------------------------------------------------------------
 class DistanceInput(BaseModel):
     point_a: dict = Field(description="First point as a dict with keys 'x' and 'y' (floats).")
     point_b: dict = Field(description="Second point as a dict with keys 'x' and 'y' (floats).")
-
-
-def extract_answer_text(output):
-    if isinstance(output, str):
-        return output
-
-    if isinstance(output, list):
-        parts = []
-        for item in output:
-            if isinstance(item, dict) and "text" in item:
-                parts.append(item["text"])
-            else:
-                parts.append(str(item))
-        return "\n".join(parts)
-
-    if isinstance(output, dict):
-        if "text" in output:
-            return output["text"]
-        if "content" in output:
-            return extract_answer_text(output["content"])
-        return str(output)
-
-    return str(output)
 
 
 # ------------------------------------------------------------------
@@ -155,9 +126,7 @@ def ros_node_and_clients():
     node = Node("llm_streamlit_agentic_ui")
     pose_cli    = node.create_client(Trigger, "/llm_tools/get_robot_pose")
     wp_cli      = node.create_client(Trigger, "/llm_tools/get_waypoints")
-    state_cli   = node.create_client(Trigger, "/llm_tools/get_robot_state")
-    nearest_cli = node.create_client(Trigger, "/llm_tools/get_nearest_waypoint")
-    return node, pose_cli, wp_cli, state_cli, nearest_cli
+    return node, pose_cli, wp_cli
 
 
 @st.cache_resource
@@ -165,7 +134,7 @@ def build_agent_executor():
     if not os.getenv("GOOGLE_API_KEY"):
         raise RuntimeError("GOOGLE_API_KEY is not set.")
 
-    node, pose_cli, wp_cli, state_cli, nearest_cli = ros_node_and_clients()
+    node, pose_cli, wp_cli = ros_node_and_clients()
     llm = ChatGoogleGenerativeAI(model=model_name(), temperature=0.3)
 
     # ---- Tool 1: get_robot_pose (no parameters) ----
@@ -200,14 +169,7 @@ def build_agent_executor():
             ensure_ascii=False,
         )
 
-    # ---- Tool 4: get_robot_state (full sensor snapshot) ----
-    @tool("get_robot_state")
-    def get_robot_state() -> str:
-        """Returns a full robot sensor snapshot as JSON (pose, speed, laser scan stats, IMU, interpretation)."""
-        data = call_trigger_json(node, state_cli)
-        return json.dumps(data, ensure_ascii=False)
-
-    tools = [get_robot_pose, get_waypoints, calculate_distance, get_robot_state]
+    tools = [get_robot_pose, get_waypoints, calculate_distance]
     agent = create_tool_calling_agent(llm, tools, FULL_PROMPT)
     executor = AgentExecutor(
         agent=agent,
@@ -228,7 +190,7 @@ def main():
     with st.sidebar:
         st.markdown("**Configuration**")
         st.markdown(f"- Model: `{model_name()}`")
-        st.markdown("- Tools: `get_robot_pose` · `get_waypoints` · `calculate_distance` · `get_robot_state`")
+        st.markdown("- Tools: `get_robot_pose` · `get_waypoints` · `calculate_distance` ")
         st.markdown("- Language: multilingual (responds in user's language)")
         st.divider()
         if st.button("Reset chat"):
@@ -271,14 +233,12 @@ def main():
                     {"input": user_text, "chat_history": st.session_state.lc_history},
                     config={"callbacks": [tracker]},
                 )
-
-
-                answer = extract_answer_text(result.get("output", result))               
-                #answer = result["output"]
+              
+                answer = result["output"]
 
             st.markdown(answer)
 
-            # Usage statistics displayed below the answer
+
             stats = (
                 f"Tool calls: **{tracker.tool_calls}** | "
                 f"Tokens: **{tracker.total_tokens}** "

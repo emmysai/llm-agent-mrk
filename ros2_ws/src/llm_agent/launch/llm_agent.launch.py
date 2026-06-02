@@ -18,7 +18,7 @@ def generate_launch_description():
                 "map_frame": "map",
                 "base_frame": "base_footprint",
                 "odom_topic": "/odom",
-                "scan_topic": "/scan",
+                #"scan_topic": "/scan",
             }],
         )
     ])

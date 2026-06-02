@@ -30,3 +30,6 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+
+# Mistral UI (lokal)
+ros2_ws/src/llm_agent/llm_agent/mistral.py
